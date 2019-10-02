@@ -1,0 +1,305 @@
+# ===============================
+# wuseman's mutt configuration 
+# ==============================
+
+# ------====== ABOUT ======--------
+set realname = ""
+set from = ""
+
+# ------====== iMAP ======--------
+set imap_user = ""
+set imap_pass = ""
+set folder = "imaps://imap.gmail.com:993"
+set mail_check=5
+set imap_keepalive=300
+
+# ------===== SMTP =======---------
+set smtp_url = "smtp://mailhere@smtp.gmail.com:587/"
+set smtp_pass = ""
+
+# ------====== FOLDERS =====-------
+set spoolfile = "+INBOX"
+set postponed ="+[Gmail]/Drafts"
+set trash = "+[Gmail]/Trash"
+set record="+[Gmail]/Sent Mail"
+
+mailboxes \
+    "+INBOX" \
+    "+[Gmail]/Important" \
+    "+[Gmail]/Chats" \
+    "+[Gmail]/Sent" \
+    "+[Gmail]/Drafts" \
+    "+[Gmail]/All\ Mail" \
+    "+[Gmail]/Spam" \
+    "+[Gmail]/Bin"
+
+# ------====== MiSC =====--------
+unset move                                               # Gmail does that
+set wait_key = no                                        # Shut up, mutt
+set mbox_type = Maildir                                  # Mailbox type
+set mail_check = 0                                       # minimum time between scans
+set timeout = 10                                         # idle time before scanning
+set delete                                               # don't ask, just do
+unset confirmappend                                      # don't ask, just do!
+set quit                                                 # don't ask, just do!!
+unset mark_old                                           # read/new is good enough for me
+set beep_new                                             # bell on new mails
+set pipe_decode                                          #  strip headers and eval mimes when piping
+set thorough_search                                      # strip headers and eval mimes before searching
+set copy="yes"                                           # Always save a copy of outgoing mails
+#set delete="yes"                                        # Don't ask for mails flagged 'deleted' when exiting
+set fcc_attach="yes"                                     # Save attachments for outgoing messages
+set time_inc = 300                                       # make the progress updates not that expensive, this will update the bar every 300ms
+set send_charset="utf-8"                                 # Character set on sent messages
+set assumed_charset="iso-8859-1"                         # if there is no character set given on incoming messages, it is probably windows
+set editor="vim -c 'set syntax=mail ft=mail enc=utf-8'"  # make sure Vim knows Mutt is a mail client and that a UTF-8 encoded message will be composed
+set menu_scroll=yes                                      # # just scroll one line instead of full page
+set confirmappend="no"                                   # Don't ask to append a mail
+set confirmcreate="yes"                                  # Ask before creating a new folder
+set save_empty="no"	                                 # Delete empty folders
+set sleep_time=0 
+
+# ------======= MiMETYPE =======--------
+# we want to see some MIME types inline, see below this code listing for explanation
+auto_view application/msword
+auto_view application/pdf
+set mime_forward=ask-no
+set mime_forward_decode
+
+# ------====== SEARCH =====--------
+set simple_search="~f %s | ~C %s | ~s %s"                # make default search pattern to search in To, Cc and Subject
+
+# ------====== iNDEX/SORTiNG =====--------
+set date_format = "%y/%m/%d"
+set index_format = "[%Z] Recieved: %D     From: %-34.20F  %s"
+set index_format = "[%Z] %D | %-34.20F | %s"
+set sort = threads                         # like gmail
+set sort_aux = reverse-last-date-received  # like gmail
+set uncollapse_jump                        # don't collapse on an unread message
+set sort_re                                # thread based on regex
+set reply_regexp = "^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"
+set strict_threads=yes
+set date_format = "[%Y/%m/%d - %M:%H:%S]"
+set index_format = "[%Z] %D %-20.20F %s"
+set strict_threads
+
+# ------====== HEADERS =====--------
+# Show
+ignore          *
+unignore        From To Cc Bcc Date Subject Recieved x-mailer x-spam-status x-spam-report List-Unsubscribe Reply-to Errors-To In-Reply-To References X-Received 
+
+# Order
+unhdr_order     *
+hdr_order       From: To: Cc: Bcc: Date: Subject:                                                                 # Show in this order, from top to bottom
+
+# ------====== SiDEBAR =====-------
+set sidebar_visible = yes
+set sidebar_width = 20                                                                                            # Note: Some characters, e.g. Chinese, take up two columns each.
+set sidebar_folder_indent = yes
+set sidebar_short_path = yes
+set sidebar_new_mail_only=no                                                                                      # Make the Sidebar only display mailboxes that contain new, or flagged,
+set sidebar_indent_string = '  '                                                                                  # Indent mailbox paths with this string.
+color sidebar_highlight             brightwhite magenta
+color sidebar_divider               magenta     default
+color sidebar_flagged               brightred   default
+color sidebar_new                   brightgreen default
+set sidebar_format = '%B%?F? [%F]?%* %?N?%N/?%S'
+
+# SIDEBAR NAVIGATION
+bind index,pager <right>  sidebar-next
+bind index,pager <left>   sidebar-prev
+bind index \Co            sidebar-open
+bind index,pager B        sidebar-toggle-visible                                                                     # Use 'B' to switch the Sidebar on and off
+
+## =============================
+## Reply and Forward
+## =============================
+unset use_domain                                          # Don't add the hostname to the From header
+unset use_from                                            # Don't generate a From header
+
+# ------= DATE =====---
+# This command is used to inject format strings dynamically into $index_format based on pattern matching against the current message.
+# The $index_format expando %@name@ specifies a placeholder for the injection. Index-format-hooks with the same name are matched using pattern against the current message. Matching is done in the order specified in the .muttrc, with the first match being used. The hook's format-string is then substituted and evaluated.
+# Because the first match is used, best practice is to put a catch-all ~A pattern as the last hook. Here is an example showing how to implement dynamic date formatting:
+# http://www.mutt.org/doc/manual/#index-format-hook
+ set index_format="%4C %-6@date@ %-15.15F %Z (%4c) %s"
+ index-format-hook  date  "~d<1d"    "%[%H:%M]"
+ index-format-hook  date  "~d<1m"    "%[%a %d]"
+ index-format-hook  date  "~d<1y"    "%[%b %d]"
+ index-format-hook  date  "~A"       "%[%m/%y]"
+# ---
+# Show subject to the left in main window
+#set index_format="%4C %Z %{%b %d} %-15.15L (%?l?%4l&%4c?)%*  %s"
+
+# ============
+# MISC
+# ============
+
+# ------====== COLORZ =====--------
+## ========================================================================
+## Remember:    Order counts!  The *last* matching rule "wins".
+## ========================================================================
+
+mono  bold         bold
+mono  underline    underline
+mono  indicator    reverse
+mono  error        bold
+color tree         brightmagenta    default                                                                                                # Colors for a convo ->  
+color message      brightwhite      default                                                                                                # Color for login text and such things, sending etc
+color normal       white            default                                                                                                # Default color
+color status       brightmagenta    default                                                                                                # Color for top line and status line
+color indicator    brightwhite      magenta                                                                                                # Indicator, the bar you see when moving around
+color markers      brightwhite      default                                                                                                # Color in mail messages when a line begins on a new line 
+color error        brightred        default                                                                                                # Colors for errors
+# color tilde      brightyellow     blue                                                                                                   # IN a message if there is much room under the message, this is the color to set then
+color body         brightblue       default "[\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+"                                                          # Colors for email addresses
+color body         brightblue       default '[[:alnum:]][-+.#_[:alnum:]]*@[-+.[:alnum:]]*[[:alnum:]]'                                      # Colors for email addresses
+color body         brightblue       default  "[[:alnum:]][-+.#_[:alnum:]]*@[-+.[:alnum:]]*[[:alnum:]][?][^ ]{3,}"                          # Colors for email addresses
+color body         brightwhite      default "(irc|telnet|http?|https?|ftp)://[\-\.,/%~_:?&=\#a-zA-Z0-9]+"                                  # Colors for urls
+color body         brightwhite      default 'www[.][-.a-z0-9]+[.][a-z]{2,}([-_./~a-z0-9]+)?'                                               # Urls without http..
+color body         brightgreen      default "[;:][-o][)|]"                                                                                 # Positive/Happy emoticon
+color body         brightred        default "[;:][-o][(/|]"                                                                                # Sad/Mad emoticon
+color body         brightwhite      default "(Regards?|regards|mvh|MVH)"                                                                   # Colors for ending
+color body         brightcyan       default "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"                                                              # Colors for ipv4 addresses
+color body         brightblue       default "\b([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}\b"                                                   # Colors for ipv6 addresses
+color body         brightyellow     default '\<(january|february|march|april|may|june|july|august|september|october|november|december)\>'  # Months in english
+color body         brightyellow     default '\<(januar|februar|maerz|april|mai|juni|juli|august|september|oktober|november|dezember)\>'    # Months in english
+color body         brightyellow     default '\<(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\>'  # Months in swedish
+color body         brightyellow     default '\<(jan|feb|mar|apr|mai|jul|jul|aug|sep|okt|nov|dec)\>'                                        # Months in swedish
+color body         brightgreen      default '\<((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])[.]){3}(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\>'           # Colors for ipv4 addresses
+color body         brightgreen      default '\<((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])[.]){3}[a-z]\>'                                         # Colors for ipv4 addresses (example: 192.168.1.*)
+color body         brightgreen      default "((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.?){4}"                                                  # IP addresses as shown by "ifconfig":
+color body         brightgreen      default  "inet addr:[^ ]*"                                                                             # IP addresses as shown by "ifconfig":
+color body         brightblue       default '\<([0-9a-f]{1,4}:)*[0-9a-f]{1,4}::?[0-9a-f]{1,4}/(16|32|64|128)'                              # Colors for ipv6 addresses
+color body         brightwhite      default "\<\(/[-_.a-zA-Z0-9]+\){2,}/"                                                                  # Colors for paths with a trial slash, example /etc/config/
+color body         brightwhite      default "\(/[-_.a-zA-Z0-9]+\){2,}"                                                                     # Colors for path without a trial slash, example: /etc/config
+color body         brightblue       default "\\$[a-zA-Z][-_a-zA-Z]+"                                                                       # Colors for variables, example: $PATH
+color body         brightmagenta    yellow  '[.]/([-0-9a-z]/)+[-0-9a-z._]+'                                                                # Colors for subdirs of current dir, example ./emagnet/emagnet.sh
+color body         brightyellow     default "([A-ZÃ„Ã–Ãœ]  {1,3}){3,}"                                                                     # Try catch idiot's texting like: "T H I S  I S  A  C O O L  T E X T - N O T !" (from gucket.net)
+color body         brightyellow     default "(\\<[-A-ZÃ„Ã–Ãœ]\\> *){3,}"                                                                   # Try catch idiot's texting like: "T H I S  I S  A  C O O L  T E X T - N O T !" (from guckes.net)
+color body         brightyellow     default "(\\<[-A-ZÃ„Ã–Ãœ]\\> ? ?){3,}"                                                                 # Try catch idiot's texting like: "T H I S  I S  A  C O O L  T E X T - N O T !" (from guckes.net)
+color body         white            red     '\<\w \w( +\w\>)+'                                                                             # Emphasis by interspersed spaces Example: E M P H A S I S (from guckes.net)
+color body         brightred        default "[*][-+[:alnum:]]+ *[-+[:alnum:]]+[*]"                                                         # example: "*really important*" "**very-much up-to-date **"
+color body         brightred        default "[*][*][-+[:alnum:]]+ *[-+[:alnum:]]+[*][*]"                                                   # example: "*really important*" "**very-much up-to-date **"
+color body         brightred        default "[*][*][*][-+[:alnum:]]+ *[-+[:alnum:]]+[*][*][*]"                                             # example: "*really important*" "**very-much up-to-date **"
+color body         brightmagenta    default '\</[-a-z0-9]+/\>'                                                                             # Words emphasized in slashes: examples:  "/foo/"  "/italics/"
+color body         brightred        default '_[-a-z0-9]+_'                                                                                 # words emphasized in _underscores_: examples: _foo_  _bar_
+color body         brightred        default "'[^ ]+'"                                                                                      # words emphasized in 'ticks': examples: 'foo'  'bar'
+color body         brightred        default "'[^ ]+ [^ ]+'"                                                                                # words emphasized in 'ticks': examples: 'foo'  'bar'
+color body         brightred        default '>[-[:alnum:]]+<'                                                                              # words emphasized in <angles>:
+color body         brightred        default '<[-[:alnum:]]+>'                                                                              # words emphasized in <angles>:
+color body         brightwhite      default "\\w+/\\w+"                                                                                    # Alternatives ("either/or"):
+color body         brightwhite      default "[-._a-zA-Z0-9]+/[-._a-zA-Z0-9]+"                                                              # Alternatives ("either/or"):
+color body         brightwhite      default "([-._a-zA-Z0-9]+/)+[-._a-zA-Z0-9]+"                                                           # Alternatives ("either/or"):
+color body         brightgreen      default '(o_O|\\o/)'                                                                                   # Smiley faces
+color body         brightgreen      default '\^_?\^'                                                                                       # Smiley faces
+color body         black            default '/o\\'                                                                                         # "oh, no!"
+color body         red              default '<3'                                                                                           # <3
+color body         brightgreen      default '[=:;]-?[)OpP]'                                                                                # Smileys:  =) :)   ;)   
+color body         brightred        default "[=;:]-[/(|@]"                                                                                 # Smileys:  =) :) :-|  :-/  :-(
+color body         blue             default "<[Gg]>"                                                                                       # Grinning:  "grin" ([g]) and "big grin" ([bg]):
+color body         blue             default "<[Bb][Gg]>"                                                                                   # Grinning:  "grin" ([g]) and "big grin" ([bg]):
+color body         brightblue       default '[-._=+~/\*]{3,}'                                                                              # Border Lines of length three or more. (Several Newsletters use border lines..)
+color body         brightwhite      default "[!?]{3,}"                                                                                     # Annoying question marks: "!!!"  "???"
+color body         brightgreen      default "[.,0-9]+ ?%"                                                                                  # Percentages: Example: 23%                         
+color body         brightblue       default "\\$[0-9]+[.,0-9]*"                                                                            # Dollarz: $
+color body         brightblue       default '[0-9]+[.,0-9]* *USD'                                                                          # Money USD: United State Dollar
+color body         brightblue       default "(dkr|skr|sek|kr|nok|plz|dm|kronor|€|euro?s?|\$\$\$)\> *[1-9][0-9]*([.,][0-9]*-?-?)?"          # Money 
+color body         white            default "[0-9]+[,.][0-9]* *pf/min"                                                                     # Money in minutes
+color body         white            default "[0-9][0-9.,]*( *--? *[0-9][0-9,.]*)? *(dm|dollar|â‚¬|euro?|mark)"                             # Money
+color body         white            default "(dm|â‚¬|euro?|mark) *[0-9][0-9.,]*(--?|[0-9][0-9])?"                                          # Money
+color body         white            default '[0-9]+,- *(â‚¬|euro?s?)?'                                                                     # Looks like money? example:  "23,-" "42,-â‚¬"
+color body         brightyellow     default "19[789][0-9]"                                                                                 # Year Numbers 1970-2029
+color body         brightyellow     default "20[012][0-9]"                                                                                 # Year Numbers 1970-2029
+color body         blue             default '[0-9][0-9]:[0-9][0-9]:[0-9][0-9],[0-9][0-9][0-9]'                                             # Timeframes: 00:00:21
+color body         yellow           default '[0-9]+px'                                                                                     # Colors for css, 23px, 41px
+color body         blue             default '!important'                                                                                   # Colors for css
+color body         brightred        default '(11|12|13)th'                                                                                 # Colors for 11th
+color body         brightred        default '1st|2nd|3rd'                                                                                  # Colors for 1st, 2nd and so on
+color body         brightgreen      default  '\<Yes\>'                                                                                     # Colors for yes
+color body         brightred        default  '\<No\>'                                                                                      # Colors for no
+color body         brightred        default '(biology|chemistry|engineering|mathematics|medicine|physics|philosophy|psychology)'           # Sciences
+color body         green            default '^X-[-a-zA-Z0-9]:'                                                                             # Examples: "X-Editor" "X-Mailer:" "X-Location:"
+color body         red              default  ' [,.!?] '                                                                                    # Punctuation surrounded by spaces
+color body         brightyellow     default 'v?[0-9.]+'                                                                                    # Colors for versions
+color body         brightyellow     default '\<v(ersion)??[0-9][.][0-9.]+'                                                                 # Colors for versions
+color body         brightred        default '\<[.]\<[a-z]{2,}\>'                                                                           # top level domains
+color body         brightyellow     default 'x86_64'                                                                                       # Architectures
+color body         brightcyan       default "([0-9]+ *([-]|until) *)?[0-9]+ *(seconds?|minutes?|hours?|days?|weeks?|months?|years?)"       # Time ranges
+color body         brightwhite      default "^(hey|hello*|tjo*|Hej|hi|Hi|hej|ola|Dear|hallå*|Hallå*|Goddag*|Mr|mr|mrs)"                    # Hi on different languages
+color body         brightgreen      default "(done|klar|Klar|Done|nice|Nice|Cool|cool|awesome|amazing|fantastic|wo*w|yup|yes|Yes|Yup)"     # Good signs
+color body         brightgreen      default "(friend|Friend|mate|Mate|bud|buddy|Thanks|thx|thanks|thank|right|Right|Join|join|enter)"                      # Good signs
+#color body         brightred        default "^([Nn][Oo]*|[Ff]*$|[Bb]ye|Ass*hole$|Idiot|idiot|suck|nej|Nej|[Suck*$|No$|no|Nope|nix$|Nix$|Closed|closed)"  # Bad signs
+color body         brightgreen      default "(CEO|VD|Developer|developer|vd|ceo|vice|Vice|Please|please|plz|pls|Snälla|snäll|God|Bra|bra|friends|Friends)" # Good signs
+color body         brightgreen      default "(tack|Tack|thx|tks|thks|thankz|dunder|fixas|fixa|laga|lagade|grejjade|greja|vänliga|vänlig)"   # Good signs
+color body         yellow           default "(rss|feed)"                                                                                    # Feed 
+color body         brightblue       default "(facebook)"                                                                                    # Companys with blue text 
+color body         brightcyan       default "(twitter|idg.se)"                                                                              # Companys with cyan text
+color body         brightblue       default "(aftonbladet)"                                                                                 # Companys with yellow text
+color body         brightcyan       default "(sweclockers)"                                                                                 # Companys with orange text
+color body         brightcyan       default "(svt|mobil)"                                                                                   # Companys with red text
+color body         brightcyan       default '(austria|belgium|bulgaria|canada|finland|croatia|cyprus|czech.republic|denmark|estonia|finland|france|germany|great *britain|greece|hungary|ireland|italy|latvia|lithuania|luxembourg|malta|(the *)?netherlands|poland|portugal|romania|slovakia|slovenia|spain|sweden|switzerland|united *kingdom)'
+#color body         brightwhite      default '(,|-|"|'|]|[|}|{|(|))'                                                                         # Not alphatet
+
+# COLORS FOR HEADER
+color header      brightyellow    default      ".*"                                                                                 # Default colors for headers
+color header      brightgreen     default      "^(From)"                                                                            # Color on the form line
+color header      brightcyan      default      "^(Subject)"                                                                         # Color for subject
+color header      brightblack     default      "^(CC|BCC)"                                                                          # Color for CC/BCC
+color header      yellow          default      "^(Date)"                                                                            # Colorz for Date in headers
+color header      brightblue      default      "^(To)"                                                                              # Colorz for to in headers
+
+# FLAGS
+color index        brightblue       default "~P"                                                                                           # Mail from myself (~P = Personally)
+color index        brightwhite      default "~O"                                                                                           # Non opened messages
+color index        brightgreen      default "~F" #                                                                                         # Flagged Messages are important!  I use the flag to indicate that I should reply to these soon.
+color index        brightred        blue    "~D"                                                                                           # Messages flagged for delete
+
+# SIGNATURE
+color signature    brightblue       default  # pager body
+
+#  Show  attachments:
+color attachment   green            default
+
+# QUOTE
+color quoted      brightmagenta     default  # pager body
+color quoted1     brightred         default  # pager body
+color quoted2     brightcyan        default  # pager body
+color quoted3     brightyellow      default  # pager body
+
+#  SPAM indicators within the Subject: line ("~s"):
+color index blue  magenta '~s \\(none\\)'
+color index blue  magenta '~s "ad(v)?:"'
+color index blue  magenta '~s "adv\.[ ]"'
+color index blue  magenta '~s "To help your business succeed"'
+color index blue  magenta '~s "Have You Heard of Age Reversal"'
+color index blue  magenta '~s "Analyst.s Pick"'
+color index blue  magenta '~s "LOW risk, HIGH yield"'
+color index blue  magenta '~s "123 Inkjets"'
+color index blue  magenta '~s "150 FREE Business Cards"'
+color index blue  magenta '~s "Register to win your Dream Vacation"'
+color index blue  magenta '~s "Free Pics"'
+color index blue  magenta '~s "Mortgage For 30 Yr. Fixed Term"'
+color index blue  magenta '~s "TARGETED EMAIL ADDRESSES"'
+color index blue  magenta '~s "INCREASE PORTFOLIO VALUE"'
+color index blue  magenta '~s "Congratulations, You Won"'
+color index blue  magenta '~s "RAPID EXPANSION"'
+color index blue  magenta '~s "Take Control of Your Financial Security"'
+color index blue  magenta '~s "Work at Home . Make Great Money"'
+color index blue  magenta '~s "WIN"'
+color index blue  magenta '~s "CASINO"'
+color index blue  magenta '~s "Bonus"'
+color index blue  magenta '~s "XXX"'
+
+# NAVIGATION
+bind generic             gg        first-entry
+bind generic,index       G         last-entry
+
+# HTML EMAILS
+alternative_order text/plain text/enriched text/html
+auto_view text/html
+auto_view text/x-vcard text/html text/enriched
+
+# Status Bar -----------------------------------------
+set status_chars  = " *%A"
+set status_format = "───[ Folder: %f ]───[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]───%>─%?p?( %p postponed )?───"
