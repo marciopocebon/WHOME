@@ -38,13 +38,15 @@
 
 # ARE WE DOCKED
 DOCKED="$(awk '/1/{print $0}' /sys/devices/platform/dock.0/docked)"
-if [[ $DOCKED -eq "1" ]]; then
+
 
 # SCREENS
 LAPTOP="eDP-1"
 ACER="DP-2-3"
 LENOVO="DP-2-2"
 TCL="DP-2-1"
+
+if [[ $DOCKED -eq "1" ]]; then
     xrandr --output $TCL       --right-of $LENOVO
     xrandr --output $TCL       --left-of $ACER
     xrandr --output $LENOVO    --left-of $TCL
